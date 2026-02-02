@@ -1,4 +1,5 @@
 import React, {useState} from "react";
+import TodoItem from "./TodoItem";
 
 const List = () => {
 
@@ -11,17 +12,19 @@ const List = () => {
     }
 
     function handleKeyDown(e) {
-        if (e.key === 'Enter'){
+        if (e.key === 'Enter' && e.target.value != ''){
             console.log([...todos, task])
             setTodos([...todos, task])
             setTask('')
         }
     }
 
-    const [isHovered, setIsHovered] = useState(false)
-
     function eraseTask(index){
-        setTodos(todos.splice(index,1))
+        const newArr = [...todos]
+        newArr.splice(index, 1)
+        setTodos(newArr)
+        console.log(todos)
+
     }
 
     
@@ -37,20 +40,11 @@ const List = () => {
                 className="p-3 border border-1 rounded-2"
             />
             <ul className="list-group">
-                {todos.map((todo, index) =>{
+                {todos.map((todo, index) => {
                     return (
-                    <li 
-                    className="list-group-item d-flex justify-content-between align-items-center p-3" 
-                    key={index}
-                    onMouseEnter={() => setIsHovered(true)}
-                    onMouseLeave={() => setIsHovered(false)}>
-                        {todo}
-                        <span style={{display: isHovered ? "inline" : "none"}} onClick={() => eraseTask(index)}>
-                            <i className="bi bi-x"></i>
-                        </span>
-                    </li>
+                        <TodoItem todo={todo} index={index} onDelete={eraseTask} />
                     )
-                })}
+                    })}   
                 <li className="list-group-item p-1"><span className="fw-light fst-italic">{todos.length} items left</span></li>
             </ul>
         </div>
