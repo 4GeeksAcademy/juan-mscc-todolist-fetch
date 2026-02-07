@@ -14,6 +14,6 @@ import Test from './components/Test';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <Test/>
+    <Home/>
   </React.StrictMode>,
 )

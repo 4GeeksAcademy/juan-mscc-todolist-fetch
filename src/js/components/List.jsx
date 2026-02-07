@@ -1,10 +1,11 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import TodoItem from "./TodoItem";
 
 const List = () => {
 
+    const USER = 'Eren'
 
-    const [todos, setTodos] = useState(['Wash the dishes', 'Walk the dog'])
+    const [todos, setTodos] = useState([])
     const [task, setTask] = useState('')
     
     function inputValue(e){
@@ -19,6 +20,29 @@ const List = () => {
         }
     }
 
+    function addNewTask(){
+        fetch('https://playground.4geeks.com/todo/todos/Eren', {
+        method: "POST",
+        body: JSON.stringify(task),
+        headers: {
+          "Content-Type": "application/json"
+        }
+        })
+        .then(resp => {
+            console.log(resp.ok); // Will be true if the response is successful
+            console.log(resp.status); // Status code 201, 300, 400, etc.
+            return resp.json(); // Will attempt to parse the result to JSON and return a promise where you can use .then to continue the logic
+        })
+        .then(data => {
+            // This is where your code should start after the fetch is complete
+            console.log(data); // This will print the exact object received from the server to the console
+        })
+        .catch(error => {
+            // Error handling
+            console.log(error);
+        });
+    }
+
     function eraseTask(index){
         const newArr = [...todos]
         newArr.splice(index, 1)
@@ -27,6 +51,37 @@ const List = () => {
 
     }
 
+    function addNewUser(){
+        fetch('https://playground.4geeks.com/todo/users/Eren', {
+            method: "POST",
+            headers: {
+                "content-Type": "application/json"
+            }
+        })
+    }
+
+    useEffect(() => {
+
+        fetch('https://playground.4geeks.com/todo/users/Eren')
+        .then(response => {
+            if(!response.ok) {
+                throw response.status
+            }
+            return response.json()
+        })
+        .then(response => {
+            console.log(response.todos)
+            setTodos(response.todos.map(e => {
+               return e.label 
+            }))
+        }).catch(response => {
+            if (response == 404){
+                addNewUser()
+            } else {console.log(response)}
+        })
+
+
+    }, [])
     
     return (
         <div className="w-25 mx-auto d-flex flex-column justify-content-center text-start">

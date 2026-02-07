@@ -1,39 +1,41 @@
-import React from "react";
+import React, {useState, useEffect} from "react";
 
 
 
 function Test() {
-
+    //console.log("RENDER");
     function filterByDeceased(characters){
-        const deceasedList = [];
-        for (const id in characters) {          
-            
-           if (characters[id].status == 'Deceased') deceasedList.push(characters[id].name) 
-            
+        const list = [];
+        for (const character of characters) {          
+            if (character.status == 'Deceased') {list.push(character.name)}
         }
 
-        return deceasedList
+        return list
     }
 
-    let list
+    let [deceasedList, setDeceasedList] = useState([])
 
-    fetch('https://thesimpsonsapi.com/api/characters')
-        .then(response => {
-            if(!response.ok) throw new Error(response.statusText)
-            return(response.json())
+    useEffect(() => {
+        //console.log("EFFECT RUN");
+        fetch('https://thesimpsonsapi.com/api/characters')
+            .then(response => {
+                if(!response.ok) throw new Error(response.statusText)
+                return(response.json())
+            })
+            .then(resp => {
+                console.log(resp.results)
+                setDeceasedList(filterByDeceased(resp.results))
+            })
+            .catch(error => {
+                console.log('Something went wrong.', error)
         })
-        .then(resp => {
-            list = filterByDeceased(resp.results)
-        })
-        .catch(error => {
-            console.log('Something went wrong.', error)
-        })
+    }, [])
     
-    console.log(list)
+
     return (
         <div className="vh-100 bg-secondary">
             <h1>Hola Mundirijillo</h1>
-
+            <p>{deceasedList}</p>
         </div>
     )
 }
