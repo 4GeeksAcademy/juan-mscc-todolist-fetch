@@ -14,8 +14,7 @@ const List = () => {
 
     function handleKeyDown(e) {
         if (e.key === 'Enter' && e.target.value != ''){
-            console.log([...todos, task])
-            setTodos([...todos, task])
+            addNewTask()
             setTask('')
         }
     }
@@ -23,19 +22,39 @@ const List = () => {
     function addNewTask(){
         fetch('https://playground.4geeks.com/todo/todos/Eren', {
         method: "POST",
-        body: JSON.stringify(task),
+        body: JSON.stringify({"label": task,"is_done": false}),
         headers: {
           "Content-Type": "application/json"
         }
         })
         .then(resp => {
-            console.log(resp.ok); // Will be true if the response is successful
-            console.log(resp.status); // Status code 201, 300, 400, etc.
-            return resp.json(); // Will attempt to parse the result to JSON and return a promise where you can use .then to continue the logic
+            console.log(resp.status); 
+            return resp.json(); 
         })
         .then(data => {
-            // This is where your code should start after the fetch is complete
-            console.log(data); // This will print the exact object received from the server to the console
+            updateList()
+            console.log(data);
+            console.log(todos)
+        })
+        .catch(error => {
+            // Error handling
+            console.log(error);
+        });
+    }
+
+    function updateList() {
+        fetch('https://playground.4geeks.com/todo/users/Eren')
+        .then(response => {
+            if(!response.ok) {
+                throw response.status
+            }
+            return response.json()
+        })
+        .then(response => {
+            console.log(response)
+            setTodos(response.todos.map(e => {
+               return {'label': e.label, 'id': e.id} 
+            }))
         })
         .catch(error => {
             // Error handling
@@ -44,11 +63,44 @@ const List = () => {
     }
 
     function eraseTask(index){
-        const newArr = [...todos]
-        newArr.splice(index, 1)
-        setTodos(newArr)
-        console.log(todos)
+        fetch(`https://playground.4geeks.com/todo/todos/${index}`, {
+        method: "DELETE"
+        })
+        .then(resp => {
+            console.log(resp.ok);
+            console.log(resp.status);
+            //return resp.json(); 
+        })
+        .then(data => {
+            updateList()
+            console.log(todos); 
+        })
+        .catch(error => {
+            // Error handling
+            console.log(error);
+        });
+        
 
+    }
+
+    function deleteAllTasks(){
+        fetch(`https://playground.4geeks.com/todo/users/Eren`, {
+        method: "DELETE"
+        })
+        .then(resp => {
+            console.log(resp.ok);
+            console.log(resp.status);
+            return  
+        })
+        .then(data => {
+            console.log(todos);
+            setTodos([])
+            addNewUser()
+        })
+        .catch(error => {
+            // Error handling
+            console.log(error);
+        });
     }
 
     function addNewUser(){
@@ -72,7 +124,7 @@ const List = () => {
         .then(response => {
             console.log(response.todos)
             setTodos(response.todos.map(e => {
-               return e.label 
+               return {'label': e.label, 'id': e.id} 
             }))
         }).catch(response => {
             if (response == 404){
@@ -97,10 +149,13 @@ const List = () => {
             <ul className="list-group">
                 {todos.map((todo, index) => {
                     return (
-                        <TodoItem todo={todo} index={index} onDelete={eraseTask} />
+                        <TodoItem todo={todo.label} index={todo.id} onDelete={eraseTask} />
                     )
                     })}   
-                <li className="list-group-item p-1"><span className="fw-light fst-italic">{todos.length} items left</span></li>
+                <li className="list-group-item p-1 d-flex justify-content-around">
+                    <span className="fw-light fst-italic">{todos.length} items left</span>
+                    <button className="fw-light fst-italic" onClick={deleteAllTasks}>Delete all tasks</button>
+                </li>
             </ul>
         </div>
     )
